@@ -1,6 +1,8 @@
 # proyectoeant
 Proyecto final de Social Data Analytics - EANT
 
+Entrega final  https://proyectoeant.netlify.app/
+
 
 Integrantes:
 
