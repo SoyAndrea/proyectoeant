@@ -1,0 +1,413 @@
+---
+title: "Proyecto EANT"
+author: "Andrea, Cecilia y Ana Clara"
+date: "16/7/2021"
+output: 
+  html_document:
+    code_download: true
+    toc: true
+    toc_float: true
+    theme: unite  
+---
+
+# Abran Las Aulas en twitter
+
+
+## Introdución
+
+El ciclo escolar 2021 de Argentina comenzó atravesado por la problemática de la pandemia por COVID 19 y una fuerte discusión social, política y sanitaria vinculada al retorno de las clases presenciales. 
+
+
+Finalmente, entre fines de febrero y primeros días de marzo comenzó bajo la modalidad de “presencialidad cuidada” (con protocolos exhaustivos y estrictos) tanto en CABA como en PBA, pero esta modalidad se sostuvo sólo hasta mitad del mes de abril, momento en el cual, mediante Decreto presidencial, se establecieron nuevas medidas restrictivas y focalizadas para la región AMBA.
+
+
+En relación a las clases las nuevas medidas implicaron que, a partir del 19 de abril, las clases presenciales fueran suspendidas en todos los niveles y en todas sus modalidades.
+
+
+El decreto propuso inicialmente un período de restricciones que iría del 19 al 30 de abril inclusive. Finalmente el mismo se extendió hasta el 15 de junio del corriente, retomando las clases el miércoles 16 de junio.
+
+
+## Problema
+
+En este contexto se produjo una fuerte discusión pública entre Gobierno Nacional, Gobierno de CABA, Gobierno Provincial y diversos colectivos vinculados o afectados por las medidas. Una de las organizaciones civiles más activas fue la de “Padres Organizados” que llevó adelante una campaña (principalmente por redes sociales) de presión, denuncia y reclamo para que las clases presenciales se retomen lo antes posible. 
+
+
+
+La red social Twitter fue uno de los campos donde se dio la discusión y difusión de las demandas. En esta discusión no sólo estuvieron los “Padres Organizados”, sino también políticos y funcionarios, a favor o en contra de las medidas planteadas (y de las decisiones de uno y otro gobierno en cuanto al acatamiento al decreto).
+
+
+
+En términos de Ernesto Calvo, twitter se ha convertido en un nuevo foro público, que, además, genera información constante y en cantidades “inimaginables” hace tan solo 10 años. “(…) todos han comenzado a aceptar que existe una nueva esfera pública desde la cual la ciudadanía opina descarnada y permanentemente. Un foro político, social y cultural que se mantiene abierto las 24 hs del día, los 365 días del año” (Calvo, Ernesto: 12, 2015).
+
+
+
+A partir de esto, nos propusimos tomar “un recorte” de toda la información que produce twitter para explorar la discusión en relación al tema Escuelas en esta red social durante el mes de junio, y, a la vez, analizar qué dijeron y cómo se comportaron dos perfiles de usuarios específicos en ese período. Los usuarios seleccionados son el Ministro de Educación Nacional, Nicolás Trotta,   y el otro el usuario de Padres Organizados. 
+
+
+
+La selección de estos usuarios no es azarosa ni responde a un análisis previo sobre el comportamiento de estos usuarios. Podríamos haber elegido a otros, también representativos o parte de la discusión pero definimos dos públicamente conocidos y pertinentes para el tema que nos interesa analizar. 
+
+
+
+## Objetivos
+
+
+a) Analizar las características que tuvo la discusión en twitter sobre educación durante el mes de junio del corriente  a partir de la selección y análisis de palabras claves previamente definidas: **Escuela, Escuelas y #AbranLasAulas**.
+
+b) Analizar el comportamiento y discurso que tuvieron los perfiles públicos del Ministro Trotta y Padres Organizados durante ese mismo mes.
+
+
+## Resultados
+
+
+### **A)** 
+Para analizar la discusión sobre Educación a partir de palabras claves seleccionadas, hicimos una serie de pasos con RTweet y otras librerias a fin de construir el corpus de análisis. Los pasos se detallan a continuación:
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+#Librerias de trabajo
+library(rtweet)
+library(tidyverse)
+library(data.table)
+library(tm)
+library(tidytext)
+library(ggplot2)
+library(plotly)
+library(wordcloud2)
+library(wordcloud)
+library(RColorBrewer)
+library(kableExtra)
+devtools::install_github("gaospecial/wordcloud2")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Comenzamos armando nuestros datasets extrayendo tuits a través de las palabras clave EDUCACIÓN, AULAS, DOCENTES, ESCUELA y ESCUELAS, además del hashtag AbranLasEscuelas. Publicados en Buenos Aires.
+# Escuelas <- search_tweets("escuelas", n=2000, include_rts = FALSE, lang = "es", geocode = lookup_coords("Buenos Aires"))
+# 
+# Escuela <- search_tweets("escuela", n=1500, include_rts = FALSE, lang = "es", geocode = lookup_coords("Buenos Aires"))
+# 
+# Aulas <- search_tweets("aulas", n=1500, include_rts = FALSE, lang = "es", geocode = lookup_coords("Buenos Aires"))
+# 
+# Docentes <- search_tweets("docentes", n=1500, include_rts = FALSE, lang = "es", geocode = lookup_coords("Buenos Aires"))
+# 
+# Abrir <- search_tweets("#AbranLasEscuelas", n=1500, geocode = lookup_coords("Buenos Aires"))
+# 
+# Trotta <- get_timeline("trottanico", n=3000)
+# Padres <- get_timeline("PadresOrg", n=3500)
+```
+
+```{r message=FALSE, warning=FALSE}
+#Creación de dataset con las palabras clave Escuela, Escuelas y #AbranLasAulas
+# DataSet_ok <- full_join(Abrir, Escuela)
+# Dataset_listo <- full_join(DataSet_ok, Escuelas)
+```
+
+```{r message=FALSE, warning=FALSE}
+#En nuestro Dataset_listo eliminamos los tweets repetidos con la función filter
+# usuarios_unicos <- Dataset_listo %>% filter(duplicated(status_id) == FALSE)
+```
+
+```{r message=FALSE, warning=FALSE}
+#Vamos a hacer un análisis cuantitativo de nuestro corpus. Para eso, contaremos la cantidad de usuarios que hablaron sobre escuelas y aulas.
+# usuarios <- usuarios_unicos %>% filter(duplicated(user_id) == FALSE)
+# 
+# #Vamos a ver los usuarios con más rt
+# usuarios_RT <- usuarios_unicos[usuarios_unicos$is_retweet == "TRUE", ]
+#De esos 3004 usuarios, 1311 fueron RTwitteados
+#Vamos a trabajar con el dataset Usuarios_RT, es decir, con los usuarios que fueron retuiteados. A ese DS le saqué todas las columnas y me quedé solo con la de texto, al hacer esto, solo quedaron 64 observaciones. 
+
+usuarios_RT <- read.csv("Usuarios_RT.csv", encoding = "UTF-8")
+
+Usuarios_texto <- unique(usuarios_RT$text)
+Usuarios_texto <- Usuarios_texto %>% as.data.frame() %>% rename(word=".")
+custom_stop_words <- tm::stopwords("spanish")
+custom_stop_words <- custom_stop_words %>% as.data.frame() %>% rename(word=".")
+
+#Token
+usuarios_token <- Usuarios_texto %>%
+  unnest_tokens(word, word)
+usuarios_token <- usuarios_token %>%
+  anti_join(custom_stop_words)
+
+https <- filter(usuarios_token, word == "https")
+tco <- filter(usuarios_token, word == "t.co")
+u <- filter(usuarios_token, word == "u")
+n <- filter(usuarios_token, word == "n")
+fe0f <- filter(usuarios_token, word == "fe0f")
+as  <- filter(usuarios_token, word == "as")			
+dã  <- filter(usuarios_token, word == "dã")
+s  <- filter(usuarios_token, word == "s")
+
+usuarios_token <- usuarios_token %>%
+  anti_join(https)
+usuarios_token <- usuarios_token %>%
+  anti_join(tco)
+usuarios_token <- usuarios_token %>%
+  anti_join(u)
+usuarios_token <- usuarios_token %>%
+  anti_join(n)
+usuarios_token <- usuarios_token %>%
+  anti_join(fe0f)
+usuarios_token <- usuarios_token %>%
+  anti_join(as)
+usuarios_token <- usuarios_token %>%
+  anti_join(dã)
+usuarios_token <- usuarios_token %>%
+  anti_join(s)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+usuarios_token %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 4) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n)) +
+  geom_col() +
+  scale_fill_manual(values = c( "#414487"))  +
+  labs(
+    title= "Frecuencia de palabras de usuarios más retwiteados",
+    subtitle = "Período del 9 al 16 de junio en Buenos Aireso",
+    x = "Palabras", 
+    y = "Cantidad") +
+  coord_flip()
+```
+
+
+Como resultado de estos primeros pasos destacamos algunos datos:
+La cantidad de usuarios que participaron de la discusión sobre tema Escuelas, Escuelas  #Abran las aulas en Buenos Aires, fue, de 3004 USUARIOS considerando sólo la semana que va del 9 al 16 de junio. 
+
+
+De estos 3004 usuarios solamente el 43,6% tuvieron al menos un retweet (1311 usuarios). Quiere decir que menos de la mitad de los usuarios tuvieron alguna repercusión más allá de las personas con las que están directamente conectados. 
+El #Abranlasescuelas fue la idea/ concepto más frecuente entre los perfiles retwiteados. 
+
+
+Aunque, cabe mencionar, que la frecuencia es relativamente baja (65 menciones) en el contexto de una “Bag of Words” con una altísima dispersión de palabras y menciones de cada una.
+
+
+```{r}
+#Wordcloud
+usuarios_token %>%
+  count(word, sort=T) %>%
+  wordcloud2(color = "random-light", backgroundColor = "grey", size = 2)
+```
+
+### **B)** 
+Para analizar el comportamiento y discurso de los perfiles seleccionados también tuvimos que preparar los data sets y luego ponernos a ver cuán presente estuvieron estos usuarios durante el mes de junio. 
+
+
+```{r message=FALSE, warning=FALSE}
+#Unión datasets 
+Trotta <- read.csv("trotta.csv", encoding = "UTF-8")
+PadresO <-  read.csv("Padres.csv", encoding = "UTF-8")
+
+TrottaJunio <- Trotta %>% filter(created_at >= "2021-06-01 00:00:00" &
+                                   created_at <= "2021-07-01 00:00:00")
+
+PadresOJunio <- PadresO %>% filter(created_at >= "2021-06-01 00:00:00" &
+                                   created_at <= "2021-07-01 00:00:00")
+
+TrottaJunio <- TrottaJunio %>% 
+  mutate(autor = "Ministro Trotta")
+
+PadresOJunio <- PadresOJunio %>% 
+  mutate(autor = "Padres Organizados")
+
+Junio2021 <- rbind(TrottaJunio, PadresOJunio)
+```
+
+
+```{r}
+ggplot(Junio2021, aes(x = as.Date(created_at), fill = autor)) +
+  geom_histogram() +
+  scale_fill_manual(values = c( "#414487","#7ad151")) +
+  scale_x_date(breaks = "1 day") +
+  facet_wrap(~ autor, ncol = 1) +
+  ggtitle("Distribución temporal de los tweets en junio 2021") +
+  labs(x = "fecha de publicación", y = "número de tweets", caption = "Fuente: twitter") +
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, size = 8, hjust=1, vjust=.5))
+```
+
+
+Comparativamente, la actividad de Padres Organizados fue más fuerte en las semanas anteriores a la reapertura de las Escuelas que fue el día 16 de junio. Por ejemplo, los días 4 y 7 de junio Padres Organizados publicó 31 y 32 tweets respectivamente. Esos mismos días el Ministro de Educación Nacional publicó 9 y 10 tweets. 
+
+
+Ya para el día de reapertura de las clases presenciales, ambos usuarios estuvieron presentes, con 24 y 23 tweets cada uno. 
+
+
+Los días posteriores al 16 de junio, Padres Organizados mantuvo una mayor presencia en twitter que el Ministro (cabe aclarar que la “presencia” de cada usuario, la consideramos en función de la cantidad de tweets que publicó cada uno).
+
+
+Además de observar la cantidad de opiniones o tweets que cada perfil publicó, analizamos cuál de estos perfiles tuvo mayor relevancia en la red, es decir, fue más veces retwiteado. 
+
+
+El gráfico que se presenta a continuación permite ver que Padres Organizados tuvo más relevancia durante el mes de junio que el Ministros Trotta 
+
+```{r}
+ggplot(Junio2021, aes(x=retweet_count, y=autor, fill = autor)) +
+  geom_bar(stat = "identity", width =0.8) +
+  scale_fill_manual(values = c( "#414487","#7ad151")) +
+  labs(
+    title= "Alcance/Relevancia de usuarios - junio 2021",
+    subtitle = "En base a la cantidad de retweets", 
+    x = "cantidad de retweets recibidos", 
+    y = "Autor", caption = "Fuente: twitter") +
+  theme(legend.position="none")
+```
+
+Asimismo, si miramos al interior de cada cuenta o perfil se observan también comportamientos interesantes. A fin de enfocar la mirada, analizamos los tweets del día 16 de junio de cada perfil (día en que reabrieron las escuelas)
+
+
+
+
+#### **Trotta**
+
+
+El 16-6 el Ministro Trotta publicó 24 tweets. Los más “populares” fueron críticas directas al gobierno de la Ciudad (Rodríguez Larreta) y al ex gobierno nacional de Mauricio Macri. Durante ese día también se expresó sobre las Pruebas Aprender y posteó alguna “noticias institucionales” vinculadas a visitas/ aportes a escuelas o programas de educación. 
+
+
+```{r}
+Junio2021 %>%
+  group_by(autor, text, retweet_count, created_at) %>%
+  select(autor, text, retweet_count, created_at) %>%
+  filter(created_at == as.Date("2021-06-16 00:00:00")) %>%
+  filter(autor == "Ministro Trotta") %>% 
+  filter(retweet_count >= 400) %>% 
+    kableExtra::kbl () %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = TRUE)
+```
+
+A continuación se muestra una nube de palabras, con la cual se puede visualizar cuáles fueron los conceptos más destacados en la cuenta
+
+```{r message=FALSE, warning=FALSE}
+#Vamos a hacer una nube de palabras con el time line del ministro Trotta. Para eso, vamos a tokenizar el texto. 
+Trotta <- read.csv("Trotta.csv")
+
+trotta_texto <- unique(Trotta$text)
+trotta_texto <- trotta_texto %>% as.data.frame() %>% rename(word=".")
+trotta_token <- trotta_texto %>%
+  unnest_tokens(word, word)
+
+trotta_token <- trotta_token %>%
+  anti_join(custom_stop_words)
+https2 <- filter(trotta_token, word == "https")
+trotta_token <- usuarios_token %>%
+  anti_join(https)
+
+```
+
+```{r echo=TRUE}
+trotta_token %>%
+  count(word, sort=T) %>%
+  wordcloud2(color = "random-light", backgroundColor = "grey", size = 1.5)
+```
+
+
+
+
+
+#### **Padres Organizados**
+
+
+Esta cuenta venia manifestando críticas contrarias al gobierno nacional y de la provincia de Buenos Aires. Su objetivo principal era conseguir  la reapertura de la presencialidad en las Escuelas. Los mensajes y días 16 de junio más retwiteados fueron:
+
+```{r}
+Junio2021 %>%
+  group_by(autor, text, retweet_count, created_at) %>%
+  select(autor, text, retweet_count, created_at) %>%
+  filter(created_at == as.Date("2021-06-16 00:00:00")) %>%
+  filter(autor == "Padres Organizados") %>% 
+  kableExtra::kbl () %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = TRUE)
+```
+
+
+A continuación se muestra una nube de palabras, con la cual se puede visualizar cuáles fueron los conceptos más destacados en la cuenta
+
+```{r message=FALSE, warning=FALSE}
+#Ahora vamos a hacer el mismo procedmiento pero para el time line de la cuenta principal de Padres Organizados. 
+
+Padres <- read.csv("Padres.csv")
+padres_texto <- unique(Padres$text)
+padres_texto <- padres_texto %>% as.data.frame() %>% rename(word=".")
+
+padres_token <- padres_texto %>%
+  unnest_tokens(word, word)
+padres_token <- padres_token %>%
+  anti_join(custom_stop_words)
+
+tco2 <- filter(padres_token, word == "t.co")
+padres_token <- padres_token %>%
+  anti_join(tco2)
+https3 <- filter(padres_token, word == "https")
+padres_token <- padres_token %>%
+  anti_join(https3)
+u <- filter(padres_token, word == "u")
+n <- filter(padres_token, word == "n")
+fe0f <- filter(padres_token, word == "fe0f")
+padres_token <- padres_token %>%
+  anti_join(u)
+padres_token <- padres_token %>%
+  anti_join(n)
+padres_token <- padres_token %>%
+  anti_join(fe0f)
+s <- filter(padres_token, word == "s")
+padres_token <- padres_token %>%
+  anti_join(s)
+
+niã <- filter(padres_token, word == "niã")
+padres_token <- padres_token %>%
+  anti_join(niã)
+mã <- filter(padres_token, word == "mã")
+padres_token <- padres_token %>%
+  anti_join(mã)
+ã <- filter(padres_token, word == "ã")
+padres_token <- padres_token %>%
+  anti_join(ã)
+
+â <- filter(padres_token, word == "â")
+padres_token <- padres_token %>%
+  anti_join(â)
+
+estã <- filter(padres_token, word == "estã")
+padres_token <- padres_token %>%
+  anti_join(estã)
+```
+
+
+```{r echo=TRUE}
+padres_token %>%
+  count(word, sort=T) %>%
+  wordcloud2(color = "random-light", backgroundColor = "grey", size = 1.5)
+```
+
+## Conclusión
+
+
++ La discusión sobre las Escuelas y presencialidad estuvo presente con una consigna principal que fue #abranlasescuelas.
+
+
+
++ La voz de “Padres Organizados” fue mucho más relevante que la del propio Ministro de Educación Nacional Nicolás Trotta.
+
+
+
++ Las opiniones de Trotta más relevantes fueron críticas a la gestión educativa de los gobiernos de Macri y Larreta. Luego se centró en “anuncios” de gestión nacional (ignorando la agenda del principal grupo que llevaba la consigna #abranlasaulas).
+
+
+
++ Las comunicaciones de Padres Organizados rondaron principalmente en demandas, reclamos, petitorios al gobierno nacional. Los más relevantes fueron por la reapertura de Talleres Técnicos (día de Escuelas Técnicas) y el pedido de un Plan Nacional y provinciales para recuperar clases perdidas y las pruebas Aprender.
+
+
+
++ En Twitter, todos pueden opinar, instantáneamente y sin filtro. Pero paradójicamente cuanto más se habla, menos se escucha. La propia lógica de la red (basada en preferencias) contribuye a reafirmar creencias, prejuicios y posiciones ideológicas de los participantes.
+
+
+
+## Recursos Bibliográficos
+
++  **Calvo Ernesto, "Anatomìa politica de Twitter en Argentina", Capital Intelectual, 2015**
+
++ [**Webs con Rmarkdown de Paola Corrales**](https://paocorrales.github.io/post/webs-con-rmarkdown/)
+
++ [**Text mining con R: ejemplo práctico Twitter de Joaquín Amat**](https://rpubs.com/Joaquin_AR/334526)
+
