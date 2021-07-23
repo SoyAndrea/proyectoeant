@@ -1,6 +1,5 @@
 ---
 title: "Proyecto EANT"
-author: "Andrea, Cecilia y Ana Clara"
 date: "16/7/2021"
 output: 
   html_document:
@@ -12,6 +11,13 @@ output:
 
 # Abran Las Aulas en twitter
 
+Autoras
+
+[Cecilia Cejas](https://www.linkedin.com/in/cecilia-m-cejas-0b38a722/)
+
+[Ana Clara Bormida](linkedin.com/in/anabormida/)
+
+[Andrea Gomez Vargas](https://soyandrea.netlify.app/)
 
 ## Introdución
 
@@ -63,7 +69,7 @@ b) Analizar el comportamiento y discurso que tuvieron los perfiles públicos del
 ### **A)** 
 Para analizar la discusión sobre Educación a partir de palabras claves seleccionadas, hicimos una serie de pasos con RTweet y otras librerias a fin de construir el corpus de análisis. Los pasos se detallan a continuación:
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
+```{r message=FALSE, warning=FALSE}
 #Librerias de trabajo
 library(rtweet)
 library(tidyverse)
@@ -79,7 +85,7 @@ library(kableExtra)
 devtools::install_github("gaospecial/wordcloud2")
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=TRUE, message=FALSE, warning=FALSE}
 #Comenzamos armando nuestros datasets extrayendo tuits a través de las palabras clave EDUCACIÓN, AULAS, DOCENTES, ESCUELA y ESCUELAS, además del hashtag AbranLasEscuelas. Publicados en Buenos Aires.
 # Escuelas <- search_tweets("escuelas", n=2000, include_rts = FALSE, lang = "es", geocode = lookup_coords("Buenos Aires"))
 # 
@@ -115,7 +121,7 @@ devtools::install_github("gaospecial/wordcloud2")
 #De esos 3004 usuarios, 1311 fueron RTwitteados
 #Vamos a trabajar con el dataset Usuarios_RT, es decir, con los usuarios que fueron retuiteados. A ese DS le saqué todas las columnas y me quedé solo con la de texto, al hacer esto, solo quedaron 64 observaciones. 
 
-usuarios_RT <- read.csv("Usuarios_RT.csv", encoding = "UTF-8")
+usuarios_RT <- readr::read_csv("Usuarios_RT.csv")
 
 Usuarios_texto <- unique(usuarios_RT$text)
 Usuarios_texto <- Usuarios_texto %>% as.data.frame() %>% rename(word=".")
@@ -127,7 +133,10 @@ usuarios_token <- Usuarios_texto %>%
   unnest_tokens(word, word)
 usuarios_token <- usuarios_token %>%
   anti_join(custom_stop_words)
+```
 
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
 https <- filter(usuarios_token, word == "https")
 tco <- filter(usuarios_token, word == "t.co")
 u <- filter(usuarios_token, word == "u")
@@ -136,6 +145,8 @@ fe0f <- filter(usuarios_token, word == "fe0f")
 as  <- filter(usuarios_token, word == "as")			
 dã  <- filter(usuarios_token, word == "dã")
 s  <- filter(usuarios_token, word == "s")
+Num1 <- filter(usuarios_token, word == "2755")
+Num2 <- filter(usuarios_token, word == "0001f4cc")
 
 usuarios_token <- usuarios_token %>%
   anti_join(https)
@@ -153,6 +164,10 @@ usuarios_token <- usuarios_token %>%
   anti_join(dã)
 usuarios_token <- usuarios_token %>%
   anti_join(s)
+usuarios_token <- usuarios_token %>%
+  anti_join(Num1)
+usuarios_token <- usuarios_token %>%
+  anti_join(Num2)
 ```
 
 
@@ -280,7 +295,7 @@ A continuación se muestra una nube de palabras, con la cual se puede visualizar
 
 ```{r message=FALSE, warning=FALSE}
 #Vamos a hacer una nube de palabras con el time line del ministro Trotta. Para eso, vamos a tokenizar el texto. 
-Trotta <- read.csv("Trotta.csv")
+Trotta <- read.csv("Trotta.csv", encoding = "UTF-8")
 
 trotta_texto <- unique(Trotta$text)
 trotta_texto <- trotta_texto %>% as.data.frame() %>% rename(word=".")
@@ -290,15 +305,25 @@ trotta_token <- trotta_texto %>%
 trotta_token <- trotta_token %>%
   anti_join(custom_stop_words)
 https2 <- filter(trotta_token, word == "https")
-trotta_token <- usuarios_token %>%
+trotta_token <- trotta_token %>%
   anti_join(https)
+Num1 <- filter(trotta_token, word == "2755")
+trotta_token <- trotta_token %>%
+  anti_join(Num1)
+U <- filter(trotta_token, word== "U")
+trotta_token <- trotta_token %>%
+  anti_join(U)
+u <- filter(trotta_token, word== "U")
+trotta_token <- trotta_token %>%
+  anti_join(u)
+#Num2 <- filter(usuarios_token, word == "0001f4cc")
 
 ```
 
 ```{r echo=TRUE}
 trotta_token %>%
   count(word, sort=T) %>%
-  wordcloud2(color = "random-light", backgroundColor = "grey", size = 1.5)
+  wordcloud2(color = "random-light", backgroundColor = "grey", size = 2)
 ```
 
 
@@ -326,7 +351,7 @@ A continuación se muestra una nube de palabras, con la cual se puede visualizar
 ```{r message=FALSE, warning=FALSE}
 #Ahora vamos a hacer el mismo procedmiento pero para el time line de la cuenta principal de Padres Organizados. 
 
-Padres <- read.csv("Padres.csv")
+Padres <- read.csv("Padres.csv", encoding = "UTF-8")
 padres_texto <- unique(Padres$text)
 padres_texto <- padres_texto %>% as.data.frame() %>% rename(word=".")
 
@@ -334,7 +359,10 @@ padres_token <- padres_texto %>%
   unnest_tokens(word, word)
 padres_token <- padres_token %>%
   anti_join(custom_stop_words)
+```
 
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
 tco2 <- filter(padres_token, word == "t.co")
 padres_token <- padres_token %>%
   anti_join(tco2)
@@ -371,6 +399,16 @@ padres_token <- padres_token %>%
 estã <- filter(padres_token, word == "estã")
 padres_token <- padres_token %>%
   anti_join(estã)
+
+Num3 <- filter(padres_token, word == "0001f447")
+Num4 <- filter(padres_token, word == "0001f4cc")
+Num5 <- filter(padres_token, word == "0001f56f")
+padres_token <- padres_token %>%
+  anti_join(Num3)
+padres_token <- padres_token %>%
+  anti_join(Num4)
+padres_token <- padres_token %>%
+  anti_join(Num5)
 ```
 
 
@@ -378,6 +416,21 @@ padres_token <- padres_token %>%
 padres_token %>%
   count(word, sort=T) %>%
   wordcloud2(color = "random-light", backgroundColor = "grey", size = 1.5)
+```
+
+
+```{r}
+padres_token %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 150) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n)) +
+  geom_col() +
+  labs(
+    title= "Frecuencia de palabras de la cuenta Padres Organizados",
+    x = "Palabras", 
+    y = "Cantidad") +
+  coord_flip()
 ```
 
 ## Conclusión
